@@ -2,13 +2,17 @@ const express = require('express');
 const cors = require ('cors');
 const morgan = require('morgan');
 const path=require('path');
+const databaseConnection=require('./databaseConection.js');
+const UserRoutes=require('./routes/UserRoutes.js');
 
 // crear una instancia de express 
 
 const app = express ();
+
 // configuramos el acceso a las variables de entorno 
 require('dotenv').config();
-
+// conexion a la base de dato
+databaseConnection();
 
 // configura el puerto donde se ejecuta el servidor - backend
 
@@ -50,4 +54,6 @@ app.get('/test',async(req,res,next)=>{
         console.error(error);
         next(error);
     }
-})
+});
+
+UserRoutes('/users', app)
