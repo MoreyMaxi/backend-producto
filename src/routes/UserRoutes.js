@@ -1,7 +1,7 @@
 const UserController = require('../controllers/userController');
-//instanciamos una clase 
-const controller = new UserController
+const Auth=require('../utils/AuthMiddlewares');
 const UserRoutes = (base, app)=> {
+    const controller = new UserController();
 
     app.post(`${base}/create-admin`, async (req,res,next) => {
         try {
@@ -13,8 +13,9 @@ const UserRoutes = (base, app)=> {
             return res.status(500).json({message:"ocurrio un error al crear el usuario"})
         }
     });
-
-    app.post(`${base}`, async (req,res,next) => {
+// agrego isAuth para manejar y si no pasa mandarselo al midleware
+// tiene q pertenecer a un rol de admin para modificar
+    app.post(`${base}`, Auth.isAuth, Auth.isAdmin, async (req,res,next) => {
         try {
             const {email, password} = req.body;
             await controller.CreateNewUser(email,password);
@@ -35,6 +36,15 @@ const UserRoutes = (base, app)=> {
             console.error("Error al eliminar un usuario>", error);
             return res.status(500).json({message:"ocurrio un error al intentar eliminar un usuario"});
 
+        }
+    });
+    /// login users
+    app.post(`${base}/login`, async (req, res, next)=>{
+        try{
+            const response = await controller.Login(req,res);
+            return response; 
+        } catch (error) { 
+            next(error);
         }
     })
 };
